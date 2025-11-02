@@ -29,6 +29,14 @@ export interface OCRResult {
 }
 
 /**
+ * Progress callback information during OCR processing
+ */
+export interface OCRProgress {
+  status: string;
+  progress: number; // 0-1
+}
+
+/**
  * Status information during OCR processing
  */
 export interface OCRProcessingStatus {

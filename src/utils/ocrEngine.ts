@@ -16,7 +16,7 @@
  *   └─ Plan: docs/03_plans/overall/20241102_01_project-overall-plan.md
  */
 
-import Tesseract, { type Worker } from "tesseract.js";
+import Tesseract, { type Worker } from 'tesseract.js';
 
 /**
  * OCR Engine Configuration
@@ -68,7 +68,7 @@ export class OCREngine {
    */
   constructor(config?: Partial<OCRConfig>) {
     this.config = {
-      language: "jpn",
+      language: 'jpn',
       useWorker: true,
       ...config,
     };
@@ -83,16 +83,16 @@ export class OCREngine {
     }
 
     try {
-      this.log("Initializing OCR worker...");
+      this.log('Initializing OCR worker...');
 
       // Create worker
       this.worker = await Tesseract.createWorker(this.config.language);
 
       this.ready = true;
-      this.log("OCR worker initialized successfully");
+      this.log('OCR worker initialized successfully');
     } catch (error) {
       this.log(`Failed to initialize OCR worker: ${error}`);
-      throw new Error("Failed to load language data");
+      throw new Error('Failed to load language data');
     }
   }
 
@@ -107,8 +107,8 @@ export class OCREngine {
     onProgress?: (progress: OCRProgress) => void
   ): Promise<OCRResult> {
     // Validate input
-    if (!imageData || typeof imageData !== "string") {
-      throw new Error("Invalid image data");
+    if (!imageData || typeof imageData !== 'string') {
+      throw new Error('Invalid image data');
     }
 
     // Initialize worker if not ready
@@ -117,13 +117,13 @@ export class OCREngine {
     }
 
     if (!this.worker) {
-      throw new Error("Worker not initialized");
+      throw new Error('Worker not initialized');
     }
 
     const startTime = Date.now();
 
     try {
-      this.log("Starting OCR recognition...");
+      this.log('Starting OCR recognition...');
 
       // Perform OCR with progress tracking
       const result = await this.worker.recognize(imageData);
@@ -133,7 +133,7 @@ export class OCREngine {
       if (onProgress) {
         onProgress({
           progress: 1,
-          status: "recognizing text",
+          status: 'recognizing text',
         });
       }
 
@@ -158,11 +158,11 @@ export class OCREngine {
   async terminate(): Promise<void> {
     if (this.worker) {
       try {
-        this.log("Terminating OCR worker...");
+        this.log('Terminating OCR worker...');
         await this.worker.terminate();
         this.worker = null;
         this.ready = false;
-        this.log("OCR worker terminated successfully");
+        this.log('OCR worker terminated successfully');
       } catch (error) {
         this.log(`Failed to terminate OCR worker: ${error}`);
         throw error;
