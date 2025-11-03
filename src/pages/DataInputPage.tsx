@@ -20,28 +20,22 @@
  *   └─ Plan: docs/03_plans/overall/20241102_01_project-overall-plan.md
  */
 
-import type React from "react";
-import { useCallback, useState } from "react";
-import { Button } from "../components/common/Button/Button";
-import { Layout } from "../components/common/Layout/Layout";
-import { OCRProcessor } from "../components/DataInput/OCRProcessor";
-import type { OCRRegionResult } from "../hooks/useOCR";
-import { useTemplate } from "../hooks/useTemplate";
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import { Button } from '../components/common/Button/Button';
+import { Layout } from '../components/common/Layout/Layout';
+import { OCRProcessor } from '../components/DataInput/OCRProcessor';
+import type { OCRRegionResult } from '../hooks/useOCR';
+import { useTemplate } from '../hooks/useTemplate';
 
 export const DataInputPage: React.FC = () => {
   const { templates, getTemplate } = useTemplate();
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null
-  );
-  const [processingResults, setProcessingResults] = useState<OCRRegionResult[]>(
-    []
-  );
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [processingResults, setProcessingResults] = useState<OCRRegionResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const currentTemplate = selectedTemplateId
-    ? getTemplate(selectedTemplateId)
-    : null;
+  const currentTemplate = selectedTemplateId ? getTemplate(selectedTemplateId) : null;
 
   const handleSelectTemplate = useCallback((templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -55,21 +49,21 @@ export const DataInputPage: React.FC = () => {
   }, []);
 
   const handleOCRError = useCallback((err: Error) => {
-    setError(err.message || "OCR処理中にエラーが発生しました");
+    setError(err.message || 'OCR処理中にエラーが発生しました');
     setShowResults(false);
   }, []);
 
   const handleCopyToClipboard = useCallback(() => {
     const textToCopy = processingResults
       .map((result) => `${result.regionName}: ${result.text}`)
-      .join("\n");
+      .join('\n');
 
     navigator.clipboard.writeText(textToCopy).then(
       () => {
-        alert("結果をクリップボードにコピーしました");
+        alert('結果をクリップボードにコピーしました');
       },
       () => {
-        setError("クリップボードへのコピーに失敗しました");
+        setError('クリップボードへのコピーに失敗しました');
       }
     );
   }, [processingResults]);
@@ -93,10 +87,7 @@ export const DataInputPage: React.FC = () => {
 
         {/* Error Display */}
         {error && (
-          <div
-            className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded"
-            role="alert"
-          >
+          <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
             <p className="text-red-700 font-medium">{error}</p>
           </div>
         )}
@@ -111,9 +102,7 @@ export const DataInputPage: React.FC = () => {
                   ステップ 1: テンプレート選択
                 </h2>
                 {templates.length === 0 ? (
-                  <p className="text-slate-500">
-                    テンプレートが登録されていません
-                  </p>
+                  <p className="text-slate-500">テンプレートが登録されていません</p>
                 ) : (
                   <div className="space-y-2">
                     {templates.map((template) => (
@@ -123,13 +112,11 @@ export const DataInputPage: React.FC = () => {
                         onClick={() => handleSelectTemplate(template.id)}
                         className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-colors ${
                           selectedTemplateId === template.id
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-slate-200"
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-slate-200'
                         }`}
                       >
-                        <p className="font-medium text-slate-900">
-                          {template.name}
-                        </p>
+                        <p className="font-medium text-slate-900">{template.name}</p>
                         <p className="text-sm text-slate-600">
                           {template.regions?.length ?? 0} 領域
                         </p>
@@ -154,9 +141,7 @@ export const DataInputPage: React.FC = () => {
                   />
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-lg text-slate-700 mb-2">
-                      テンプレートを選択してください
-                    </p>
+                    <p className="text-lg text-slate-700 mb-2">テンプレートを選択してください</p>
                   </div>
                 )}
               </div>
@@ -164,9 +149,7 @@ export const DataInputPage: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">
-              ステップ 3: 結果確認
-            </h2>
+            <h2 className="text-lg font-semibold text-slate-900 mb-6">ステップ 3: 結果確認</h2>
             <div className="space-y-4 mb-6">
               {processingResults.map((result) => (
                 <div
@@ -174,16 +157,12 @@ export const DataInputPage: React.FC = () => {
                   className="border border-slate-200 rounded-lg p-4 bg-slate-50"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-slate-900">
-                      {result.regionName}
-                    </h3>
+                    <h3 className="font-semibold text-slate-900">{result.regionName}</h3>
                     <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
                       信頼度: {Math.round(result.confidence)}%
                     </span>
                   </div>
-                  <p className="text-slate-700 font-mono text-sm break-words">
-                    {result.text}
-                  </p>
+                  <p className="text-slate-700 font-mono text-sm break-words">{result.text}</p>
                 </div>
               ))}
             </div>

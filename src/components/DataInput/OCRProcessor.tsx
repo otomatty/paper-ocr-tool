@@ -20,18 +20,11 @@
  *   └─ Plan: docs/03_plans/overall/20241102_01_project-overall-plan.md
  */
 
-import {
-  type ChangeEvent,
-  type FC,
-  type FormEvent,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
-import { type OCRRegionResult, useOCR } from "../../hooks/useOCR";
-import type { Template } from "../../types/template";
-import { Button } from "../common/Button/Button";
-import { Layout } from "../common/Layout/Layout";
+import { type ChangeEvent, type FC, type FormEvent, useCallback, useRef, useState } from 'react';
+import { type OCRRegionResult, useOCR } from '../../hooks/useOCR';
+import type { Template } from '../../types/template';
+import { Button } from '../common/Button/Button';
+import { Layout } from '../common/Layout/Layout';
 
 /**
  * Props for OCRProcessor component
@@ -90,7 +83,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
 }) => {
   // State management
   const [imageData, setImageData] = useState<string | null>(null);
-  const [imageName, setImageName] = useState<string>("");
+  const [imageName, setImageName] = useState<string>('');
   const [showResultEditor, setShowResultEditor] = useState(false);
   const [editResults, setEditResults] = useState<OCRRegionResult[]>([]);
 
@@ -98,16 +91,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Hooks
-  const {
-    isProcessing,
-    progress,
-    status,
-    results,
-    error,
-    processImage,
-    cancel,
-    reset,
-  } = useOCR({
+  const { isProcessing, progress, status, results, error, processImage, cancel, reset } = useOCR({
     preprocessing: true,
     preprocessingOptions,
   });
@@ -126,10 +110,10 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
       const file = files[0];
 
       // Validate file type
-      if (!file.type.startsWith("image/")) {
+      if (!file.type.startsWith('image/')) {
         setImageData(null);
-        setImageName("");
-        onError?.(new Error("Invalid file type. Please select an image."));
+        setImageName('');
+        onError?.(new Error('Invalid file type. Please select an image.'));
         return;
       }
 
@@ -137,8 +121,8 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
       const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         setImageData(null);
-        setImageName("");
-        onError?.(new Error("Image size too large. Maximum 5MB."));
+        setImageName('');
+        onError?.(new Error('Image size too large. Maximum 5MB.'));
         return;
       }
 
@@ -153,8 +137,8 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
 
       reader.onerror = () => {
         setImageData(null);
-        setImageName("");
-        onError?.(new Error("Failed to read file"));
+        setImageName('');
+        onError?.(new Error('Failed to read file'));
       };
 
       reader.readAsDataURL(file);
@@ -170,17 +154,14 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
       event.preventDefault();
 
       if (!imageData) {
-        onError?.(new Error("No image selected"));
+        onError?.(new Error('No image selected'));
         return;
       }
 
       try {
         // Process image with or without template regions
         const flattenedRegions = flattenTemplateRegions(template);
-        const processedResults = await processImage(
-          imageData,
-          flattenedRegions
-        );
+        const processedResults = await processImage(imageData, flattenedRegions);
 
         // Update edit results for potential editing
         setEditResults(processedResults);
@@ -189,8 +170,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
         // Call completion callback
         onComplete?.(processedResults);
       } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error("Processing failed");
+        const error = err instanceof Error ? err : new Error('Processing failed');
         onError?.(error);
       }
     },
@@ -203,7 +183,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
   const handleCancel = useCallback(async () => {
     await cancel();
     setImageData(null);
-    setImageName("");
+    setImageName('');
     reset();
   }, [cancel, reset]);
 
@@ -212,9 +192,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
    */
   const handleEditResult = useCallback((regionId: string, newText: string) => {
     setEditResults((prev) =>
-      prev.map((result) =>
-        result.regionId === regionId ? { ...result, text: newText } : result
-      )
+      prev.map((result) => (result.regionId === regionId ? { ...result, text: newText } : result))
     );
   }, []);
 
@@ -231,7 +209,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
    */
   const handleRetry = useCallback(() => {
     setImageData(null);
-    setImageName("");
+    setImageName('');
     reset();
   }, [reset]);
 
@@ -274,9 +252,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                       alt="Selected for OCR"
                       className="max-h-64 max-w-full object-cover rounded-lg shadow-md"
                     />
-                    <p className="text-sm font-medium text-slate-700">
-                      {imageName}
-                    </p>
+                    <p className="text-sm font-medium text-slate-700">{imageName}</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
@@ -294,9 +270,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <p className="text-base font-medium text-slate-700">
-                      クリックして画像を選択
-                    </p>
+                    <p className="text-base font-medium text-slate-700">クリックして画像を選択</p>
                     <p className="text-sm text-slate-500">PNG, JPG 5MB まで</p>
                   </div>
                 )}
@@ -315,10 +289,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
 
             {/* Progress Display */}
             {isProcessing && (
-              <section
-                className="space-y-3 bg-blue-50 p-4 rounded-lg"
-                aria-live="polite"
-              >
+              <section className="space-y-3 bg-blue-50 p-4 rounded-lg" aria-live="polite">
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
@@ -379,9 +350,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                   className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      {result.regionName}
-                    </h3>
+                    <h3 className="text-lg font-semibold text-slate-900">{result.regionName}</h3>
                     <span className="inline-block px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-700">
                       信頼度: {Math.round(result.confidence)}%
                     </span>
@@ -405,11 +374,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                 onClick={() => setShowResultEditor(true)}
                 variant="secondary"
               />
-              <Button
-                label="完了"
-                onClick={handleSaveResults}
-                variant="primary"
-              />
+              <Button label="完了" onClick={handleSaveResults} variant="primary" />
             </div>
           </section>
         )}
@@ -437,9 +402,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                     <textarea
                       id={`edit-${result.regionId}`}
                       value={result.text}
-                      onChange={(e) =>
-                        handleEditResult(result.regionId, e.target.value)
-                      }
+                      onChange={(e) => handleEditResult(result.regionId, e.target.value)}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 placeholder-slate-400 min-h-[6rem] resize-vertical"
                     />
                   </div>
@@ -452,11 +415,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
                   onClick={() => setShowResultEditor(false)}
                   variant="secondary"
                 />
-                <Button
-                  label="保存"
-                  onClick={handleSaveResults}
-                  variant="primary"
-                />
+                <Button label="保存" onClick={handleSaveResults} variant="primary" />
               </div>
             </div>
           </div>
@@ -465,12 +424,7 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
         {/* Retry Button */}
         {error && !isProcessing && imageData && (
           <div className="mt-6 flex justify-center">
-            <Button
-              label="再試行"
-              onClick={handleRetry}
-              variant="secondary"
-              disabled={disabled}
-            />
+            <Button label="再試行" onClick={handleRetry} variant="secondary" disabled={disabled} />
           </div>
         )}
       </div>
@@ -478,4 +432,4 @@ export const OCRProcessor: FC<OCRProcessorProps> = ({
   );
 };
 
-OCRProcessor.displayName = "OCRProcessor";
+OCRProcessor.displayName = 'OCRProcessor';

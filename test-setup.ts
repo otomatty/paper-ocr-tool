@@ -3,7 +3,7 @@
  * Configures happy-dom for testing environment
  */
 
-import { Window } from "happy-dom";
+import { Window } from 'happy-dom';
 
 // Set up happy-dom window
 const window = new Window();
@@ -26,7 +26,7 @@ global.sessionStorage = window.sessionStorage;
 // Mock Image class for Canvas tests
 // @ts-expect-error - Mocking Image for testing
 global.Image = class Image {
-  public src = "";
+  public src = '';
   public onload: (() => void) | null = null;
   public onerror: (() => void) | null = null;
   public width = 100;
@@ -45,27 +45,27 @@ global.Image = class Image {
 // @ts-expect-error - Mocking FileReader for testing
 global.FileReader = class FileReader {
   public result: string | ArrayBuffer | null = null;
-  public onload: ((event: any) => void) | null = null;
-  public onerror: ((event: any) => void) | null = null;
+  public onload: ((event: Event) => void) | null = null;
+  public onerror: ((event: Event) => void) | null = null;
   public readyState = 0;
 
-  readAsDataURL(blob: Blob) {
+  readAsDataURL(_blob: Blob) {
     setTimeout(() => {
       this.readyState = 2;
       this.result =
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       if (this.onload) {
-        this.onload({ target: this });
+        this.onload({ target: this } as unknown as Event);
       }
     }, 0);
   }
 
-  readAsText(blob: Blob) {
+  readAsText(_blob: Blob) {
     setTimeout(() => {
       this.readyState = 2;
-      this.result = "test file content";
+      this.result = 'test file content';
       if (this.onload) {
-        this.onload({ target: this });
+        this.onload({ target: this } as unknown as Event);
       }
     }, 0);
   }
@@ -100,19 +100,18 @@ global.DataTransfer = class DataTransfer {
   }
 
   get items() {
-    const self = this;
-    const files = self._files;
+    const files = this._files;
     return {
       length: files.length,
       add: (file: File) => {
-        self._files.push(file);
+        this._files.push(file);
         return null;
       },
       remove: (index: number) => {
-        self._files.splice(index, 1);
+        this._files.splice(index, 1);
       },
       clear: () => {
-        self._files = [];
+        this._files = [];
       },
       [Symbol.iterator]: function* () {
         yield* files;
@@ -137,8 +136,8 @@ if (!global.navigator.clipboard) {
     },
     readText: async () => {
       // @ts-expect-error - Custom property for testing
-      return Promise.resolve(global.navigator.clipboard._lastCopiedText || "");
+      return Promise.resolve(global.navigator.clipboard._lastCopiedText || '');
     },
-    _lastCopiedText: "",
+    _lastCopiedText: '',
   };
 }
