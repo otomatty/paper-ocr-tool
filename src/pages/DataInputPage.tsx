@@ -12,6 +12,7 @@
  *   ├─ src/components/common/Layout/Layout.tsx
  *   ├─ src/components/common/Button/Button.tsx
  *   ├─ src/components/DataInput/OCRProcessor.tsx
+ *   ├─ src/components/DataInput/ResultEditor.tsx
  *   └─ src/types/ocr.ts
  *
  * Related Documentation:
@@ -22,9 +23,9 @@
 
 import type React from 'react';
 import { useCallback, useState } from 'react';
-import { Button } from '../components/common/Button/Button';
 import { Layout } from '../components/common/Layout/Layout';
 import { OCRProcessor } from '../components/DataInput/OCRProcessor';
+import { ResultEditor } from '../components/DataInput/ResultEditor';
 import type { OCRRegionResult } from '../hooks/useOCR';
 import { useTemplate } from '../hooks/useTemplate';
 
@@ -53,26 +54,35 @@ export const DataInputPage: React.FC = () => {
     setShowResults(false);
   }, []);
 
-  const handleCopyToClipboard = useCallback(() => {
-    const textToCopy = processingResults
-      .map((result) => `${result.regionName}: ${result.text}`)
-      .join('\n');
-
-    navigator.clipboard.writeText(textToCopy).then(
-      () => {
-        alert('結果をクリップボードにコピーしました');
-      },
-      () => {
-        setError('クリップボードへのコピーに失敗しました');
-      }
-    );
-  }, [processingResults]);
-
   const handleReset = useCallback(() => {
     setProcessingResults([]);
     setShowResults(false);
     setError(null);
   }, []);
+
+  const handleResultsEditorSave = useCallback(
+    (editedResults: OCRRegionResult[]) => {
+      // Copy edited results to clipboard
+      const textToCopy = editedResults
+        .map((result) => `${result.regionName}: ${result.text}`)
+        .join('\n');
+
+      navigator.clipboard.writeText(textToCopy).then(
+        () => {
+          alert('編集結果をクリップボードにコピーしました');
+          handleReset();
+        },
+        () => {
+          setError('クリップボードへのコピーに失敗しました');
+        }
+      );
+    },
+    [handleReset]
+  );
+
+  const handleResultsEditorCancel = useCallback(() => {
+    handleReset();
+  }, [handleReset]);
 
   return (
     <Layout title="OCR データ入力">
@@ -148,33 +158,11 @@ export const DataInputPage: React.FC = () => {
             </main>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">ステップ 3: 結果確認</h2>
-            <div className="space-y-4 mb-6">
-              {processingResults.map((result) => (
-                <div
-                  key={result.regionId}
-                  className="border border-slate-200 rounded-lg p-4 bg-slate-50"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-slate-900">{result.regionName}</h3>
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-                      信頼度: {Math.round(result.confidence)}%
-                    </span>
-                  </div>
-                  <p className="text-slate-700 font-mono text-sm break-words">{result.text}</p>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-between pt-6 border-t border-slate-200">
-              <Button label="戻る" onClick={handleReset} variant="secondary" />
-              <Button
-                label="📋 クリップボードにコピー"
-                onClick={handleCopyToClipboard}
-                variant="primary"
-              />
-            </div>
-          </div>
+          <ResultEditor
+            results={processingResults}
+            onSave={handleResultsEditorSave}
+            onCancel={handleResultsEditorCancel}
+          />
         )}
       </div>
     </Layout>

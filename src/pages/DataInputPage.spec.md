@@ -3,7 +3,7 @@
 ## Related Files
 
 - Implementation: `./DataInputPage.tsx`
-- Tests: `./DataInputPage.test.tsx` (未作成)
+- Tests: `./DataInputPage.test.tsx`
 - Styles: (共通スタイルのみ使用)
 
 ## Related Documentation
@@ -13,6 +13,10 @@
 - Research:
   - `docs/02_research/2024_11/20241102_01_ocr-technology-comparison.md`
   - `docs/02_research/2024_11/20241102_02_react-camera-integration.md`
+- Components Used:
+  - `src/components/DataInput/OCRProcessor.tsx`
+  - `src/components/DataInput/ResultEditor.tsx`
+  - `src/components/common/Layout/Layout.tsx`
 
 ## Requirements
 
