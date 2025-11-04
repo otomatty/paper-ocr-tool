@@ -16,7 +16,9 @@
     "e2e:debug": "playwright test --debug",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "deploy": "wrangler pages deploy dist",
+    "deploy:preview": "wrangler pages deploy dist --branch=preview"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.16",
