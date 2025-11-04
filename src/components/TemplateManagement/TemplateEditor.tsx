@@ -1,15 +1,19 @@
 /**
- * TemplateEditor Component
+ * TemplateEditor Component - Minimal Design
  *
  * DEPENDENCY MAP:
  *
  * Parents (Files that import this file):
- *   (none - new component, will be imported by TemplateManagementPage)
+ *   └─ src/pages/TemplateManagementPage.tsx
  *
  * Dependencies (External files that this file imports):
  *   ├─ react
+ *   ├─ lucide-react
  *   ├─ src/components/Camera/Camera.tsx
  *   ├─ src/components/TemplateManagement/RegionSelector.tsx
+ *   ├─ src/components/common/Button/Button.tsx
+ *   ├─ src/components/common/Card/Card.tsx
+ *   ├─ src/components/common/Badge/Badge.tsx
  *   ├─ src/hooks/useTemplate.ts
  *   ├─ src/types/template.ts
  *   └─ src/utils/validation.ts
@@ -20,12 +24,25 @@
  *   └─ Plan: docs/03_plans/template-management/20241103_01_next-implementation-plan.md
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useTemplate } from '../../hooks/useTemplate';
-import type { Region, Template } from '../../types/template';
-import { validateTemplateName } from '../../utils/validation';
-import { Camera } from '../Camera/Camera';
-import { RegionSelector } from './RegionSelector';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Camera as CameraIcon,
+  Check,
+  Save,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useTemplate } from "../../hooks/useTemplate";
+import type { Region, Template } from "../../types/template";
+import { validateTemplateName } from "../../utils/validation";
+import { Badge } from "../common/Badge/Badge";
+import { Button } from "../common/Button/Button";
+import { Card } from "../common/Card/Card";
+import { Spinner } from "../common/Spinner/Spinner";
+import { Camera } from "../Camera/Camera";
+import { RegionSelector } from "./RegionSelector";
 
 interface TemplateEditorProps {
   /**
@@ -60,30 +77,36 @@ interface StepConfig {
 const STEP_CONFIG: Record<EditorStep, StepConfig> = {
   1: {
     step: 1,
-    title: 'ベース画像撮影',
-    description: '空のアンケート用紙を撮影してください',
+    title: "ベース画像撮影",
+    description: "空のアンケート用紙を撮影してください",
   },
   2: {
     step: 2,
-    title: 'OCR領域選択',
-    description: '抽出したい領域をドラッグで選択してください',
+    title: "OCR領域選択",
+    description: "抽出したい領域をドラッグで選択してください",
   },
   3: {
     step: 3,
-    title: '確認・保存',
-    description: '内容を確認して保存してください',
+    title: "確認・保存",
+    description: "内容を確認して保存してください",
   },
 };
 
-export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSave, onCancel }) => {
+export const TemplateEditor: React.FC<TemplateEditorProps> = ({
+  templateId,
+  onSave,
+  onCancel,
+}) => {
   const { templates, createTemplate, updateTemplate } = useTemplate();
 
   // Editor state
   const [currentStep, setCurrentStep] = useState<EditorStep>(1);
-  const [templateName, setTemplateName] = useState('');
+  const [templateName, setTemplateName] = useState("");
   const [baseImageData, setBaseImageData] = useState<string | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
-  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
+    []
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -99,7 +122,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
     try {
       const template = templates.find((t) => t.id === templateId);
       if (!template) {
-        setLoadError('テンプレートが見つかりません');
+        setLoadError("テンプレートが見つかりません");
         return;
       }
 
@@ -107,8 +130,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
       setBaseImageData(template.baseImageData || null);
       setRegions(template.regions);
     } catch (error) {
-      setLoadError('テンプレートの読み込みに失敗しました');
-      console.error('Template load error:', error);
+      setLoadError("テンプレートの読み込みに失敗しました");
+      console.error("Template load error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -122,23 +145,23 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
     const nameValidation = validateTemplateName(templateName);
     if (!nameValidation.isValid) {
       errors.push({
-        field: 'templateName',
-        message: nameValidation.error || 'テンプレート名が無効です',
+        field: "templateName",
+        message: nameValidation.error || "テンプレート名が無効です",
       });
     }
 
     // Step-specific validation
     if (currentStep >= 2 && !baseImageData) {
       errors.push({
-        field: 'image',
-        message: '画像を撮影してください',
+        field: "image",
+        message: "画像を撮影してください",
       });
     }
 
     if (currentStep >= 3 && regions.length === 0) {
       errors.push({
-        field: 'regions',
-        message: '領域を1つ以上選択してください',
+        field: "regions",
+        message: "領域を1つ以上選択してください",
       });
     }
 
@@ -166,7 +189,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
   const canSave = useCallback((): boolean => {
     return (
       currentStep === 3 &&
-      templateName.trim() !== '' &&
+      templateName.trim() !== "" &&
       baseImageData !== null &&
       regions.length > 0 &&
       !isSaving
@@ -197,34 +220,41 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
   // Handle image capture
   const handleImageCapture = useCallback((imageData: string) => {
     setBaseImageData(imageData);
-    setValidationErrors((prev) => prev.filter((err) => err.field !== 'image'));
+    setValidationErrors((prev) => prev.filter((err) => err.field !== "image"));
   }, []);
 
   // Handle regions change
   const handleRegionsChange = useCallback((newRegions: Region[]) => {
     setRegions(newRegions);
-    setValidationErrors((prev) => prev.filter((err) => err.field !== 'regions'));
+    setValidationErrors((prev) =>
+      prev.filter((err) => err.field !== "regions")
+    );
   }, []);
 
   // Handle template name change
-  const handleTemplateNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    setTemplateName(newName);
+  const handleTemplateNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newName = e.target.value;
+      setTemplateName(newName);
 
-    // Real-time validation
-    const nameValidation = validateTemplateName(newName);
-    if (!nameValidation.isValid) {
-      setValidationErrors((prev) => [
-        ...prev.filter((err) => err.field !== 'templateName'),
-        {
-          field: 'templateName',
-          message: nameValidation.error || 'テンプレート名が無効です',
-        },
-      ]);
-    } else {
-      setValidationErrors((prev) => prev.filter((err) => err.field !== 'templateName'));
-    }
-  }, []);
+      // Real-time validation
+      const nameValidation = validateTemplateName(newName);
+      if (!nameValidation.isValid) {
+        setValidationErrors((prev) => [
+          ...prev.filter((err) => err.field !== "templateName"),
+          {
+            field: "templateName",
+            message: nameValidation.error || "テンプレート名が無効です",
+          },
+        ]);
+      } else {
+        setValidationErrors((prev) =>
+          prev.filter((err) => err.field !== "templateName")
+        );
+      }
+    },
+    []
+  );
 
   // Handle save
   const handleSave = useCallback(async () => {
@@ -253,7 +283,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
         // Update existing template
         await updateTemplate(templateId, {
           name: templateName.trim(),
-          baseImageData: baseImageData || '',
+          baseImageData: baseImageData || "",
           regions,
         });
 
@@ -266,7 +296,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
         // Create new template
         const savedTemplate = await createTemplate({
           name: templateName.trim(),
-          baseImageData: baseImageData || '',
+          baseImageData: baseImageData || "",
           regions,
         });
 
@@ -276,8 +306,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
         }
       }
     } catch (error) {
-      console.error('Template save error:', error);
-      alert('テンプレートの保存に失敗しました。もう一度お試しください。');
+      console.error("Template save error:", error);
+      alert("テンプレートの保存に失敗しました。もう一度お試しください。");
     } finally {
       setIsSaving(false);
     }
@@ -322,11 +352,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">テンプレートを読み込んでいます...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spinner size="large" label="テンプレートを読み込んでいます..." />
       </div>
     );
   }
@@ -334,34 +361,51 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
   // Load error state
   if (loadError) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{loadError}</p>
-          <button
-            type="button"
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-            onClick={onCancel}
-          >
+      <Card className="max-w-md mx-auto">
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <div className="p-3 bg-red-50 rounded-full">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+              読み込みエラー
+            </h3>
+            <p className="text-neutral-600">{loadError}</p>
+          </div>
+          <Button onClick={onCancel} variant="primary">
             戻る
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
   const currentConfig = STEP_CONFIG[currentStep];
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">
-          {templateId ? 'テンプレート編集' : '新規テンプレート作成'}
-        </h1>
+      <Card className="mb-6">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">
+              {templateId ? "テンプレート編集" : "新規テンプレート作成"}
+            </h1>
+            <p className="text-neutral-600 mt-1">
+              {templateId
+                ? "テンプレートを編集します"
+                : "アンケート用紙のテンプレートを作成します"}
+            </p>
+          </div>
+          <Badge variant="info">ステップ {currentStep}/3</Badge>
+        </div>
 
         {/* Template name input */}
-        <div className="mb-4">
-          <label htmlFor="templateName" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="mb-6">
+          <label
+            htmlFor="templateName"
+            className="block text-sm font-medium text-neutral-900 mb-2"
+          >
             テンプレート名
           </label>
           <input
@@ -369,59 +413,98 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
             type="text"
             value={templateName}
             onChange={handleTemplateNameChange}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              getFieldError('templateName') ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 ${
+              getFieldError("templateName")
+                ? "border-red-300 focus:ring-red-400"
+                : "border-neutral-300 hover:border-neutral-400"
             }`}
             placeholder="テンプレート名を入力（例: 顧客満足度アンケート）"
             maxLength={50}
           />
-          {getFieldError('templateName') && (
-            <p className="text-red-600 text-sm mt-1">{getFieldError('templateName')}</p>
+          {getFieldError("templateName") && (
+            <div className="flex items-center gap-2 mt-2 text-red-600 text-sm">
+              <AlertCircle className="w-4 h-4" />
+              <span>{getFieldError("templateName")}</span>
+            </div>
           )}
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center justify-center mb-6">
-          {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  step < currentStep
-                    ? 'bg-green-500 border-green-500 text-white'
-                    : step === currentStep
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'bg-white border-gray-300 text-gray-500'
-                }`}
-              >
-                {step < currentStep ? '✓' : step}
-              </div>
-              {step < 3 && (
+        {/* Step indicator - Minimal design */}
+        <div className="flex items-center justify-between gap-2 mb-6">
+          {[1, 2, 3].map((step, index) => (
+            <div key={step} className="flex items-center flex-1">
+              <div className="flex items-center gap-3 flex-1">
                 <div
-                  className={`w-24 h-1 ${step < currentStep ? 'bg-green-500' : 'bg-gray-300'}`}
-                />
-              )}
+                  className={`flex items-center justify-center w-8 h-8 rounded-full font-medium text-sm transition-all ${
+                    step < currentStep
+                      ? "bg-neutral-900 text-white"
+                      : step === currentStep
+                      ? "bg-neutral-900 text-white ring-4 ring-neutral-200"
+                      : "bg-neutral-100 text-neutral-400"
+                  }`}
+                >
+                  {step < currentStep ? <Check className="w-4 h-4" /> : step}
+                </div>
+                {step < 3 && (
+                  <div className="flex-1 h-0.5 bg-neutral-200 relative overflow-hidden">
+                    <div
+                      className={`absolute inset-0 transition-all duration-300 ${
+                        step < currentStep
+                          ? "bg-neutral-900 w-full"
+                          : "bg-transparent w-0"
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Current step title */}
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold">{currentConfig.title}</h2>
-          <p className="text-gray-600">{currentConfig.description}</p>
+        <div className="text-center py-4 bg-neutral-50 rounded-lg">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-1">
+            {currentConfig.title}
+          </h2>
+          <p className="text-sm text-neutral-600">
+            {currentConfig.description}
+          </p>
         </div>
-      </div>
+      </Card>
 
       {/* Step content */}
-      <div className="mb-6">
+      <Card className="mb-6">
         {currentStep === 1 && (
           <div>
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-200">
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <CameraIcon className="w-5 h-5 text-neutral-700" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">
+                  ベース画像撮影
+                </h3>
+                <p className="text-sm text-neutral-600">
+                  空のアンケート用紙を撮影してください
+                </p>
+              </div>
+            </div>
+
             <Camera onCapture={handleImageCapture} />
-            {getFieldError('image') && (
-              <p className="text-red-600 text-sm mt-2">{getFieldError('image')}</p>
+
+            {getFieldError("image") && (
+              <div className="flex items-center gap-2 mt-4 text-red-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>{getFieldError("image")}</span>
+              </div>
             )}
+
             {baseImageData && (
-              <div className="mt-4 text-center">
-                <p className="text-green-600 font-medium">✓ 画像が撮影されました</p>
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-green-800 font-medium">
+                  画像が撮影されました
+                </span>
               </div>
             )}
           </div>
@@ -429,127 +512,177 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ templateId, onSa
 
         {currentStep === 2 && baseImageData && (
           <div>
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-200">
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <CameraIcon className="w-5 h-5 text-neutral-700" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">OCR領域選択</h3>
+                <p className="text-sm text-neutral-600">
+                  抽出したい領域をドラッグで選択してください
+                </p>
+              </div>
+            </div>
+
             <RegionSelector
               imageData={baseImageData}
               regions={regions}
               onRegionsChange={handleRegionsChange}
             />
-            {getFieldError('regions') && (
-              <p className="text-red-600 text-sm mt-2">{getFieldError('regions')}</p>
+
+            {getFieldError("regions") && (
+              <div className="flex items-center gap-2 mt-4 text-red-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>{getFieldError("regions")}</span>
+              </div>
             )}
           </div>
         )}
 
         {currentStep === 3 && (
-          <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">確認</h3>
+          <div>
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-200">
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <Check className="w-5 h-5 text-neutral-700" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">確認・保存</h3>
+                <p className="text-sm text-neutral-600">
+                  内容を確認して保存してください
+                </p>
+              </div>
+            </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Template name */}
               <div>
-                <p className="text-sm text-gray-600">テンプレート名</p>
-                <p className="font-medium">{templateName}</p>
+                <p className="text-sm font-medium text-neutral-600 mb-2">
+                  テンプレート名
+                </p>
+                <p className="text-lg font-semibold text-neutral-900">
+                  {templateName}
+                </p>
               </div>
 
               {/* Base image thumbnail */}
               <div>
-                <p className="text-sm text-gray-600 mb-2">ベース画像</p>
+                <p className="text-sm font-medium text-neutral-600 mb-3">
+                  ベース画像
+                </p>
                 <img
-                  src={baseImageData || ''}
+                  src={baseImageData || ""}
                   alt="ベース画像"
-                  className="max-w-md border-2 border-gray-300 rounded"
+                  className="max-w-md w-full border border-neutral-200 rounded-lg shadow-sm"
                 />
               </div>
 
               {/* Regions list */}
               <div>
-                <p className="text-sm text-gray-600 mb-2">OCR領域 ({regions.length}個)</p>
-                <ul className="space-y-2">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium text-neutral-600">
+                    OCR領域
+                  </p>
+                  <Badge variant="neutral">{regions.length}個</Badge>
+                </div>
+                <div className="space-y-2">
                   {regions.map((region) => (
-                    <li key={region.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                      <span className="font-semibold text-sm w-6">{region.order}.</span>
-                      <span className="flex-1">{region.name}</span>
-                      <span className="text-xs text-gray-500">
-                        ({Math.round(region.coordinates.x * 100)}%,{' '}
+                    <div
+                      key={region.id}
+                      className="flex items-center gap-3 p-3 bg-neutral-50 border border-neutral-200 rounded-lg"
+                    >
+                      <Badge size="small" variant="neutral">
+                        {region.order}
+                      </Badge>
+                      <span className="flex-1 font-medium text-neutral-900">
+                        {region.name}
+                      </span>
+                      <span className="text-xs text-neutral-500">
+                        ({Math.round(region.coordinates.x * 100)}%,{" "}
                         {Math.round(region.coordinates.y * 100)}%)
                       </span>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Navigation buttons */}
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          variant="ghost"
           onClick={handleCancelClick}
+          icon={<X className="w-5 h-5" />}
         >
           キャンセル
-        </button>
+        </Button>
 
-        <div className="flex gap-4">
-          <button
-            type="button"
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+        <div className="flex gap-3">
+          <Button
+            variant="secondary"
             onClick={handleBack}
             disabled={!canGoBack()}
+            icon={<ArrowLeft className="w-5 h-5" />}
           >
             戻る
-          </button>
+          </Button>
 
           {currentStep < 3 ? (
-            <button
-              type="button"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              variant="primary"
               onClick={handleNext}
               disabled={!canGoNext()}
+              icon={<ArrowRight className="w-5 h-5" />}
+              iconPosition="right"
             >
               次へ
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            <Button
+              variant="primary"
               onClick={handleSave}
               disabled={!canSave()}
+              icon={isSaving ? undefined : <Save className="w-5 h-5" />}
             >
-              {isSaving && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              )}
-              {isSaving ? '保存中...' : '保存'}
-            </button>
+              {isSaving ? "保存中..." : "保存"}
+            </Button>
           )}
         </div>
       </div>
 
-      {/* Cancel confirmation dialog */}
+      {/* Cancel confirmation dialog - Minimal Design */}
       {showCancelDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md">
-            <h3 className="text-lg font-semibold mb-4">編集を中止しますか？</h3>
-            <p className="text-gray-600 mb-6">入力した内容は保存されません。よろしいですか？</p>
-            <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                onClick={handleCancelDismiss}
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-2 bg-amber-50 rounded-lg flex-shrink-0">
+                <AlertCircle className="w-6 h-6 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                  編集を中止しますか？
+                </h3>
+                <p className="text-neutral-600 leading-relaxed">
+                  入力した内容は保存されません。よろしいですか？
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={handleCancelDismiss}>
+                戻る
+              </Button>
+              <Button
+                variant="danger"
                 onClick={handleCancelConfirm}
+                icon={<X className="w-4 h-4" />}
               >
                 中止する
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

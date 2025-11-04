@@ -1,5 +1,5 @@
 /**
- * Layout Component
+ * Layout Component - Minimal Design
  *
  * DEPENDENCY MAP:
  *
@@ -11,7 +11,7 @@
  * Dependencies (External files that this file imports):
  *   ├─ react
  *   ├─ react-router-dom
- *   └─ ./Layout.module.css
+ *   └─ lucide-react
  *
  * Related Documentation:
  *   ├─ Spec: ./Layout.spec.md
@@ -20,8 +20,9 @@
  *   └─ Prompt: docs/00_prompts/20241102_02_phase2-common-components.md
  */
 
-import type React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { FileText, Home, ScanText } from "lucide-react";
+import type React from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,57 +30,74 @@ interface LayoutProps {
 }
 
 /**
- * Layout Component
+ * Layout Component - Minimal Design
  *
- * Provides a consistent layout structure for all pages with header, navigation, and main content area.
+ * Provides a clean, minimal layout structure inspired by Apple's design language.
+ * Features: subtle shadows, refined typography, and smooth transitions.
  *
  * @param children - The main content to display
  * @param title - Optional custom title (defaults to app name)
  */
 export const Layout: React.FC<LayoutProps> = ({
   children,
-  title = '紙アンケートOCR入力効率化アプリ',
+  title = "紙アンケートOCR入力効率化アプリ",
 }) => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'ホーム' },
-    { path: '/template', label: 'テンプレート管理' },
-    { path: '/data-input', label: 'データ入力' },
+    { path: "/", label: "ホーム", icon: Home },
+    { path: "/template", label: "テンプレート管理", icon: FileText },
+    { path: "/data-input", label: "データ入力", icon: ScanText },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen flex flex-col bg-neutral-50">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-neutral-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">{title}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-4">
+            <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">
+              {title}
+            </h1>
             <nav aria-label="メインナビゲーション">
-              <ul className="flex flex-wrap gap-2 sm:gap-4">
-                {navItems.map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      className={`
-                        px-4 py-2 rounded-md text-sm font-medium transition-colors
-                        ${
-                          location.pathname === item.path
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        }
-                      `}
-                      aria-current={location.pathname === item.path ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+              <ul className="flex flex-wrap gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <li key={item.path}>
+                      <Link
+                        to={item.path}
+                        className={`
+                          inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                          ${
+                            isActive
+                              ? "bg-neutral-900 text-white shadow-sm"
+                              : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                          }
+                        `}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="hidden sm:inline">{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>
         </div>
       </header>
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {children}
+      </main>
+      <footer className="bg-white border-t border-neutral-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-neutral-500">
+            © 2024 紙アンケートOCR入力効率化アプリ
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
