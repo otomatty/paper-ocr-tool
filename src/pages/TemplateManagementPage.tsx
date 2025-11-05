@@ -17,29 +17,31 @@
  *   └─ Plan: docs/03_plans/template-management/20241103_01_next-implementation-plan.md
  */
 
-import { useState } from 'react';
-import { Layout } from '../components/common/Layout/Layout';
-import { TemplateEditor } from '../components/TemplateManagement/TemplateEditor';
-import { TemplateList } from '../components/TemplateManagement/TemplateList';
+import { useState } from "react";
+import { Layout } from "../components/common/Layout/Layout";
+import { TemplateEditor } from "../components/TemplateManagement/TemplateEditor";
+import { TemplateList } from "../components/TemplateManagement/TemplateList";
 
-type DisplayMode = 'list' | 'create' | 'edit';
+type DisplayMode = "list" | "create" | "edit";
 
 export const TemplateManagementPage = () => {
-  const [mode, setMode] = useState<DisplayMode>('list');
-  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [mode, setMode] = useState<DisplayMode>("list");
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(
+    null
+  );
 
   const handleCreateNew = () => {
-    setMode('create');
+    setMode("create");
     setEditingTemplateId(null);
   };
 
   const handleEdit = (templateId: string) => {
-    setMode('edit');
+    setMode("edit");
     setEditingTemplateId(templateId);
   };
 
   const handleBackToList = () => {
-    setMode('list');
+    setMode("list");
     setEditingTemplateId(null);
   };
 
@@ -52,10 +54,12 @@ export const TemplateManagementPage = () => {
   };
 
   return (
-    <Layout title="テンプレート管理">
-      {mode === 'list' && <TemplateList onCreateNew={handleCreateNew} onEdit={handleEdit} />}
+    <Layout>
+      {mode === "list" && (
+        <TemplateList onCreateNew={handleCreateNew} onEdit={handleEdit} />
+      )}
 
-      {(mode === 'create' || mode === 'edit') && (
+      {(mode === "create" || mode === "edit") && (
         <TemplateEditor
           templateId={editingTemplateId ?? undefined}
           onSave={handleSaveComplete}

@@ -11,7 +11,8 @@
  * Dependencies (External files that this file imports):
  *   ├─ react
  *   ├─ react-router-dom
- *   └─ lucide-react
+ *   ├─ lucide-react
+ *   └─ src/components/common/Logo/Logo.tsx
  *
  * Related Documentation:
  *   ├─ Spec: ./Layout.spec.md
@@ -23,10 +24,10 @@
 import { FileText, Home, ScanText } from "lucide-react";
 import type React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Logo } from "../Logo/Logo";
 
 interface LayoutProps {
   children: React.ReactNode;
-  title?: string;
 }
 
 /**
@@ -36,12 +37,8 @@ interface LayoutProps {
  * Features: subtle shadows, refined typography, and smooth transitions.
  *
  * @param children - The main content to display
- * @param title - Optional custom title (defaults to app name)
  */
-export const Layout: React.FC<LayoutProps> = ({
-  children,
-  title = "紙アンケートOCR入力効率化アプリ",
-}) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const navItems = [
@@ -55,9 +52,9 @@ export const Layout: React.FC<LayoutProps> = ({
       <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-neutral-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-4">
-            <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">
-              {title}
-            </h1>
+            <Link to="/" className="inline-block">
+              <Logo size={140} />
+            </Link>
             <nav aria-label="メインナビゲーション">
               <ul className="flex flex-wrap gap-1">
                 {navItems.map((item) => {

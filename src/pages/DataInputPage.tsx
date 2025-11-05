@@ -97,7 +97,7 @@ export const DataInputPage: React.FC = () => {
   }, [handleReset]);
 
   return (
-    <Layout title="OCR データ入力">
+    <Layout>
       <div className="w-full max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="mb-10">
